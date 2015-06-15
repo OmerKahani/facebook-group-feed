@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html ng-app="sh">
+    <meta charset="utf-8">
+    <head>
+        <title>sh</title>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+        <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.4/angular-filter.min.js"></script>
+
+    <script src="https://rawgithub.com/gsklee/ngStorage/master/ngStorage.js"></script>
+
+
+        <script>
+            
+            function hashCode(str){
+                var hash = 0;
+                if (str.length == 0) return hash;
+                for (i = 0; i < str.length; i++) {
+                    char = str.charCodeAt(i);
+                    hash = ((hash<<5)-hash)+char;
+                    hash = hash & hash; // Convert to 32bit integer
+                }
+                return hash;
+            }
+            
+            angular.module("sh",['ngStorage','angular.filter'])
+
+
+            .controller("shController", function($scope, $http, $localStorage) {
+                $scope.$storage = $localStorage;
+                
+                $scope.time = new Date($scope.$storage.time);
+                
+                function getUNIXTime() {
+                    return  Math.round(new Date($scope.time).getTime() / 1000);
+                }
+                
+                $scope.run = function() {
+                                        $scope.postsName = []
+                    getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key)
+                };
+                
+                if (!$scope.$storage.spamers) {$scope.$storage.spamers = []};
+                if (!$scope.$storage.excloudeGroups) {$scope.$storage.excloudeGroups = []};
+                
+                $scope.markSpam = function (name) {
+                    $scope.$storage.spamers.push(name);
+                    $scope.postsName = _.filter($scope.postsName, function(post) {return $scope.$storage.spamers.indexOf(post.from.name) == -1 })
+                };
+                
+                $scope.noSpamFilter = function (item) {
+                    if  ($scope.$storage.spamers.indexOf(item.from.name) != -1) {
+                     return false;
+                    }
+                    else {
+                         return true;
+                    };  
+                };
+                                
+                var hashPosts = [];
+                
+                function getPaging(url, g) {
+                    $http.get(url).
+                    success(function (data, status, headers, config) {
+                        if (data.data.length > 0) {
+                            data.data.forEach(function (post) {
+                                var post_date = new Date(post.created_time)
+                                var hash = hashCode(post.from.name + post.message + post.description)
+                                if (post_date > $scope.time) {
+                                    if (hashPosts.indexOf(hash) == -1 && $scope.$storage.spamers.indexOf(post.from.name) == -1){
+                                        hashPosts.push(hash);
+                                        post.group = g
+                                        $scope.postsName.push(post);
+                                    }
+                                };
+                            });
+                            getPaging(data.paging.next, g);
+                        }
+                        else
+                            return;
+                    });
+                };
+                
+                function getPosts(name, id) {
+                    var group = {
+                    name: name,
+                    id: id
+                    };
+                    var gp = getPaging('https://graph.facebook.com/v2.3/' + id + '/feed?fields=from,message,description,created_time&since=' + getUNIXTime() +'&access_token=' + $scope.$storage.key, group)
+                        };
+                        
+                var groups = [];
+                
+                function getAllGroups(url) {
+                    $http.get(url).
+                    success(function(data, status, headers, config) {
+                        $scope.$storage.time = new Date();
+                        data.data.forEach(function (group) {
+                            if ($scope.$storage.excloudeGroups.indexOf(group.id) == -1) {
+                                groups.push({name: group.name, id: group.id});
+                                };
+                        });
+                        if (data.paging.next != undefined) {
+                            getAllGroups(data.paging.next)}
+                        else {
+                                                groups.forEach(function (group) {
+                        getPosts(group.name, group.id);
+                    });};
+                    });
+                };             
+                
+                getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.key)
+                   
+                $scope.excloudeGroup = function(group) {
+                    $scope.$storage.excloudeGroups.push(group);
+                    $scope.postsName = _.filter($scope.postsName, function(post) {return $scope.$storage.excloudeGroups.indexOf(post.group.id) == -1 })
+                };
+                
+                
+            });
+        </script>
+        
+        <style>
+        .group {
+              width: 50%;
+  float: right;
+  margin-right: 25%;
+        }
+            
+            .post {
+background-color: #F5F7F8;
+  width: 630px;
+  margin: 5px;
+  border: solid #ccc 1px;
+  padding: 5px;
+            }
+            
+            .close {
+                  height: 18px;
+                  overflow: hidden;              
+            }
+            
+            .name {
+                text-decoration: underline;
+  font-size: 12px;
+            }
+        </style>
+    </head>
+    <body style="text-align: right;" ng-controller="shController">
+        
+        <input type="datetime-local" ng-model="time" ng-blur="run()">
+        <input type="text" ng-model="$storage.key" ng-blur="run()">
+
+
+        <div ng-repeat="(key, value) in postsName | groupBy: 'from.name'" dir='rtl' class="group" >
+            {{key}} <button ng-click="markSpam(key)">חסום משתמש</button>
+            <div ng-repeat="post in value" class="post" ng-hide="post.duplicate">
+            <div>{{post.group.name}}: <button ng-click="excloudeGroup(post.group.id)">חסום קבוצה</button></div>
+            <span>{{post.message}}</span>
+            <span>{{post.description}}</span><br>
+            <a href="http://facebook.com/{{post.id}}" target="_blank">לפוסט המקורי</a> 
+                <span>{{post.created_time}}</span>
+            <br><br>
+            </div>
+        </div>
+
+
+    </body>
+</html>
