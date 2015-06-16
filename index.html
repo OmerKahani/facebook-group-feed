@@ -37,6 +37,7 @@
                     return  Math.round(new Date($scope.time).getTime() / 1000);
                 }
                 var hashPosts = [];
+                
                 $scope.run = function() {
                     $scope.time = new Date($scope.$storage.time);
                     $scope.postsName = [];
@@ -115,14 +116,12 @@
                     });
                 };             
                 
-                getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.key)
-                   
                 $scope.excloudeGroup = function(group) {
                     $scope.$storage.excloudeGroups.push(group);
                     $scope.postsName = _.filter($scope.postsName, function(post) {return $scope.$storage.excloudeGroups.indexOf(post.group.id) == -1 })
                 };
                 
-                
+                $scope.run();
             });
         </script>
         
