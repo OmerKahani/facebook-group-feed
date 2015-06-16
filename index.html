@@ -31,6 +31,9 @@
             .controller("shController", function($scope, $http, $localStorage) {
                 $scope.$storage = $localStorage;
                 
+                $scope.key = $storage.key;
+                $scope.user = $storage.user;
+                
                 if (!$scope.$storage.time) {$scope.$storage.time = new Date()}
                 
                 function getUNIXTime() {
@@ -154,8 +157,8 @@ background-color: #F5F7F8;
     <body style="text-align: right;" ng-controller="shController">
         
         <input type="datetime-local" ng-model="time" ng-blur="run()">
-        <input type="text" ng-model="$storage.key" ng-blur="run()">
-        <input type="text" ng-model="$storage.user" ng-blur="run()">
+        <input type="text" ng-model="key" ng-blur="run()" placeholder="key">
+        <input type="text" ng-model="user" ng-blur="run()" placeholder="user">
 
         <div ng-repeat="(key, value) in postsName | groupBy: 'from.name'" dir='rtl' class="group" >
             {{key}} <button ng-click="markSpam(key)">חסום משתמש</button>
