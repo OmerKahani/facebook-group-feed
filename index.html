@@ -31,8 +31,8 @@
             .controller("shController", function($scope, $http, $localStorage) {
                 $scope.$storage = $localStorage;
                 
-                $scope.key = $storage.key;
-                $scope.user = $storage.user;
+                $scope.key = $scope.$storage.key;
+                $scope.user = $scope.$storage.user;
                 
                 if (!$scope.$storage.time) {$scope.$storage.time = new Date()}
                 
