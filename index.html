@@ -31,15 +31,17 @@
             .controller("shController", function($scope, $http, $localStorage) {
                 $scope.$storage = $localStorage;
                 
-                $scope.time = new Date($scope.$storage.time);
+                
                 
                 function getUNIXTime() {
                     return  Math.round(new Date($scope.time).getTime() / 1000);
                 }
-                
+                var hashPosts = [];
                 $scope.run = function() {
-                                        $scope.postsName = []
-                    getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key)
+                    $scope.time = new Date($scope.$storage.time);
+                    $scope.postsName = [];
+                    hashPosts = [];
+                    getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key);
                 };
                 
                 if (!$scope.$storage.spamers) {$scope.$storage.spamers = []};
@@ -59,7 +61,7 @@
                     };  
                 };
                                 
-                var hashPosts = [];
+                
                 
                 function getPaging(url, g) {
                     $http.get(url).
@@ -105,9 +107,11 @@
                         if (data.paging.next != undefined) {
                             getAllGroups(data.paging.next)}
                         else {
-                                                groups.forEach(function (group) {
-                        getPosts(group.name, group.id);
-                    });};
+                            groups.forEach(function (group) {
+                                getPosts(group.name, group.id);
+                            });};
+                    }).error(function(data, status, headers, config ){
+                        alert('error');
                     });
                 };             
                 
