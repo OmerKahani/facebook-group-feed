@@ -31,7 +31,7 @@
             .controller("shController", function($scope, $http, $localStorage) {
                 $scope.$storage = $localStorage;
                 
-                
+                if (!$scope.$storage.time) {$scope.$storage.time = new Date()}
                 
                 function getUNIXTime() {
                     return  Math.round(new Date($scope.time).getTime() / 1000);
