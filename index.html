@@ -42,7 +42,7 @@
                     $scope.time = new Date($scope.$storage.time);
                     $scope.postsName = [];
                     hashPosts = [];
-                    getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key);
+                    getAllGroups('https://graph.facebook.com/v2.3/'+$storage.user+'/groups?&access_token=' + $scope.$storage.key);
                 };
                 
                 if (!$scope.$storage.spamers) {$scope.$storage.spamers = []};
@@ -155,7 +155,7 @@ background-color: #F5F7F8;
         
         <input type="datetime-local" ng-model="time" ng-blur="run()">
         <input type="text" ng-model="$storage.key" ng-blur="run()">
-
+        <input type="text" ng-model="$storage.user" ng-blur="run()">
 
         <div ng-repeat="(key, value) in postsName | groupBy: 'from.name'" dir='rtl' class="group" >
             {{key}} <button ng-click="markSpam(key)">חסום משתמש</button>
