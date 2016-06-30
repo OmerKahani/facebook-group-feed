@@ -31,6 +31,7 @@
             angular.module("sh",['ngStorage','angular.filter'])
                 .controller("shController", function($scope, $http, $localStorage) {
                 $scope.$storage = $localStorage;
+                if (!$scope.$storage.key) {$scope.$storage.key = '';}
 
                 $scope.offset = 0;
 
