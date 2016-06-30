@@ -2,7 +2,7 @@
 
 python -m SimpleHTTPServer PORTNUMBER
 
-use the sane PORNTNUMBER, cause things are been saved in local storage
+use the same PORNTNUMBER every time.
 
 go to: https://developers.facebook.com/tools/explorer/145634995501895/?method=GET&path=665278950172707_973258759374723&
 
