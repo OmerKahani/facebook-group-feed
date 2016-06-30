@@ -48,9 +48,9 @@
                     getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key);
                 };
 
-                if (!$scope.$storage.spamers) {$scope.$storage.spamers =
+                if (!$scope.$storage.spamers) {$scope.$storage.spamers =[]
                                               };
-                if (!$scope.$storage.excloudeGroups) {$scope.$storage.excloudeGroups =
+                if (!$scope.$storage.excloudeGroups) {$scope.$storage.excloudeGroups =[]
                                                      };
 
                 $scope.markSpam = function (name) {
