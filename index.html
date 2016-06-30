@@ -4,16 +4,19 @@
     <head>
         <title>sh</title>
 
+
+
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
         <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.9/angular.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.4/angular-filter.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.4/angular-filter.min.js"></script>
 
-    <script src="https://rawgithub.com/gsklee/ngStorage/master/ngStorage.js"></script>
-
+        <script src="https://rawgithub.com/gsklee/ngStorage/master/ngStorage.js"></script>
+        <script src="./in-viewport.js"></script>
 
         <script>
-            
+
             function hashCode(str){
                 var hash = 0;
                 if (str.length == 0) return hash;
@@ -24,49 +27,48 @@
                 }
                 return hash;
             }
-            
+
             angular.module("sh",['ngStorage','angular.filter'])
-
-
-            .controller("shController", function($scope, $http, $localStorage) {
+                .controller("shController", function($scope, $http, $localStorage) {
                 $scope.$storage = $localStorage;
-                
-                $scope.key = $scope.$storage.key;
-                $scope.user = $scope.$storage.user;
-                
-                if (!$scope.$storage.time) {$scope.$storage.time = new Date()}
-                
+                if (!$scope.$storage.key) {$scope.$storage.key = '';}
+
+                $scope.offset = 0;
+
+
+
                 function getUNIXTime() {
                     return  Math.round(new Date($scope.time).getTime() / 1000);
                 }
                 var hashPosts = [];
-                
                 $scope.run = function() {
                     $scope.time = new Date($scope.$storage.time);
                     $scope.postsName = [];
                     hashPosts = [];
-                    getAllGroups('https://graph.facebook.com/v2.3/'+$scope.user+'/groups?&access_token=' + $scope.$storage.key);
+                    getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key);
                 };
-                
-                if (!$scope.$storage.spamers) {$scope.$storage.spamers = []};
-                if (!$scope.$storage.excloudeGroups) {$scope.$storage.excloudeGroups = []};
-                
+
+                if (!$scope.$storage.spamers) {$scope.$storage.spamers =
+                                              };
+                if (!$scope.$storage.excloudeGroups) {$scope.$storage.excloudeGroups =
+                                                     };
+
                 $scope.markSpam = function (name) {
                     $scope.$storage.spamers.push(name);
                     $scope.postsName = _.filter($scope.postsName, function(post) {return $scope.$storage.spamers.indexOf(post.from.name) == -1 })
                 };
-                
+
                 $scope.noSpamFilter = function (item) {
                     if  ($scope.$storage.spamers.indexOf(item.from.name) != -1) {
-                     return false;
+                        return false;
                     }
                     else {
-                         return true;
+                        return true;
                     };  
                 };
-                                
-                
-                
+
+
+
                 function getPaging(url, g) {
                     $http.get(url).
                     success(function (data, status, headers, config) {
@@ -88,17 +90,17 @@
                             return;
                     });
                 };
-                
+
                 function getPosts(name, id) {
                     var group = {
-                    name: name,
-                    id: id
+                        name: name,
+                        id: id
                     };
                     var gp = getPaging('https://graph.facebook.com/v2.3/' + id + '/feed?fields=from,message,description,created_time&since=' + getUNIXTime() +'&access_token=' + $scope.$storage.key, group)
-                        };
-                        
+                    };
+
                 var groups = [];
-                
+
                 function getAllGroups(url) {
                     $http.get(url).
                     success(function(data, status, headers, config) {
@@ -106,7 +108,7 @@
                         data.data.forEach(function (group) {
                             if ($scope.$storage.excloudeGroups.indexOf(group.id) == -1) {
                                 groups.push({name: group.name, id: group.id});
-                                };
+                            };
                         });
                         if (data.paging.next != undefined) {
                             getAllGroups(data.paging.next)}
@@ -118,57 +120,79 @@
                         alert('error');
                     });
                 };             
-                
+
+                getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.key)
+
                 $scope.excloudeGroup = function(group) {
                     $scope.$storage.excloudeGroups.push(group);
                     $scope.postsName = _.filter($scope.postsName, function(post) {return $scope.$storage.excloudeGroups.indexOf(post.group.id) == -1 })
                 };
-                
-                $scope.run();
+
+                $scope.view = function(index){
+
+                    var i = $scope.postsName.length - 10;
+                    if (i <= index) {
+                        $scope.posts.concat($scope.postsName.slice($scope.offset,$scope.offset+10));
+                        $scope.offset = $scope.offset + 10;
+                    }
+                };
+
+                $scope.posts = []
+
+
             });
         </script>
-        
+
+        <script>
+            (function(d, s, id){
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) {return;}
+                js = d.createElement(s); js.id = id;
+                js.src = "//connect.facebook.net/en_US/sdk.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        </script>
+
         <style>
-        .group {
-              width: 50%;
-  float: right;
-  margin-right: 25%;
-        }
-            
+            .group {
+                width: 50%;
+                float: right;
+                margin-right: 25%;
+            }
+
             .post {
-background-color: #F5F7F8;
-  width: 630px;
-  margin: 5px;
-  border: solid #ccc 1px;
-  padding: 5px;
+                background-color: #F5F7F8;
+                width: 630px;
+                margin: 5px;
+                border: solid #ccc 1px;
+                padding: 5px;
             }
-            
+
             .close {
-                  height: 18px;
-                  overflow: hidden;              
+                height: 18px;
+                overflow: hidden;              
             }
-            
+
             .name {
                 text-decoration: underline;
-  font-size: 12px;
+                font-size: 12px;
             }
         </style>
     </head>
     <body style="text-align: right;" ng-controller="shController">
-        
-        <input type="datetime-local" ng-model="time" ng-blur="run()">
-        <input type="text" ng-model="key" ng-blur="run()" placeholder="key">
-        <input type="text" ng-model="user" ng-blur="run()" placeholder="user">
+        <input type="datetime-local" ng-model="$storage.time" ng-blur="run()">
+        <input type="text" ng-model="$storage.key" ng-blur="run()">
 
-        <div ng-repeat="(key, value) in postsName | groupBy: 'from.name'" dir='rtl' class="group" >
-            {{key}} <button ng-click="markSpam(key)">חסום משתמש</button>
+
+        <div ng-repeat="(key, value) in postsName | groupBy: 'from.name'" dir='rtl' class="group" viewport-enter="view($index)" >
+            {{::key}} <button ng-click="markSpam(key)">חסום משתמש</button>
             <div ng-repeat="post in value" class="post" ng-hide="post.duplicate">
-            <div>{{post.group.name}}: <button ng-click="excloudeGroup(post.group.id)">חסום קבוצה</button></div>
-            <span>{{post.message}}</span>
-            <span>{{post.description}}</span><br>
-            <a href="http://facebook.com/{{post.id}}" target="_blank">לפוסט המקורי</a> 
-                <span>{{post.created_time}}</span>
-            <br><br>
+                <div>{{::post.group.name}}: <button ng-click="excloudeGroup(post.group.id)">חסום קבוצה</button></div>
+                <span>{{::post.message}}</span>
+                <span>{{::post.description}}</span><br>
+                <a href="http://facebook.com/{{post.id}}" target="_blank">לפוסט המקורי</a> 
+                <span>{{::post.created_time}}</span>
+                <br><br>
             </div>
         </div>
 
