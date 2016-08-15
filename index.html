@@ -45,7 +45,7 @@
                     $scope.time = new Date($scope.$storage.time);
                     $scope.postsName = [];
                     hashPosts = [];
-                    getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key);
+                    getAllGroups('https://crossorigin.me/https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.$storage.key);
                 };
 
                 if (!$scope.$storage.spamers) {$scope.$storage.spamers =[]
@@ -96,7 +96,7 @@
                         name: name,
                         id: id
                     };
-                    var gp = getPaging('https://graph.facebook.com/v2.3/' + id + '/feed?fields=from,message,description,created_time&since=' + getUNIXTime() +'&access_token=' + $scope.$storage.key, group)
+                    var gp = getPaging('https://crossorigin.me/https://graph.facebook.com/v2.3/' + id + '/feed?fields=from,message,description,created_time&since=' + getUNIXTime() +'&access_token=' + $scope.$storage.key, group)
                     };
 
                 var groups = [];
@@ -121,7 +121,7 @@
                     });
                 };             
 
-                getAllGroups('https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.key)
+                getAllGroups('https://crossorigin.me/https://graph.facebook.com/v2.3/724158908/groups?&access_token=' + $scope.key)
 
                 $scope.excloudeGroup = function(group) {
                     $scope.$storage.excloudeGroups.push(group);
