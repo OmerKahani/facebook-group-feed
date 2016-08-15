@@ -70,7 +70,7 @@
 
 
                 function getPaging(url, g) {
-                    $http.get(url).
+                    $http.get('https://crossorigin.me/' + url).
                     success(function (data, status, headers, config) {
                         if (data.data.length > 0) {
                             data.data.forEach(function (post) {
