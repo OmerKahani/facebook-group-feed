@@ -102,7 +102,7 @@
                 var groups = [];
 
                 function getAllGroups(url) {
-                    $http.get(url).
+                    $http.get('https://crossorigin.me/' + url).
                     success(function(data, status, headers, config) {
                         $scope.$storage.time = new Date();
                         data.data.forEach(function (group) {
